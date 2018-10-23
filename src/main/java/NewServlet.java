@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -20,7 +21,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import simplejdbc.DAO;
+import simplejdbc.CustomerEntity;
 import simplejdbc.DAOException;
+import simplejdbc.DataSourceFactory;
 
 /**
  *
@@ -46,6 +49,8 @@ public class NewServlet extends HttpServlet {
     
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, DAOException {
+        myDataSource = DataSourceFactory.getDataSource();
+	myDAO = new DAO(myDataSource);
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
@@ -56,6 +61,10 @@ public class NewServlet extends HttpServlet {
             out.println("</head>");
             out.println("<body>");
             out.println("<table style=\"width:100%\">\n  <tr><th>ID</th><th>NOM</th><th>ADDRESS</th></tr>");
+            List<CustomerEntity> customers = myDAO.customersInState(request.getParameter("STATE"));
+            for(CustomerEntity customer : customers){
+                out.println("<tr><td>"+ customer.getCustomerId() +"</td><td>"+ customer.getName()+"</td><td>"+ customer.getAddressLine1() +"</td></tr>");
+            }
             
             out.println("</body>");
             out.println("</html>");
