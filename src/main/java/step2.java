@@ -6,10 +6,6 @@
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -20,8 +16,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
-import simplejdbc.DAO;
 import simplejdbc.CustomerEntity;
+import simplejdbc.DAO;
 import simplejdbc.DAOException;
 import simplejdbc.DataSourceFactory;
 
@@ -29,8 +25,8 @@ import simplejdbc.DataSourceFactory;
  *
  * @author pedago
  */
-@WebServlet(urlPatterns = {"/NewServlet"})
-public class NewServlet extends HttpServlet {
+@WebServlet(urlPatterns = {"/step2"})
+public class step2 extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -41,34 +37,66 @@ public class NewServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    private DAO myDAO; // L'objet à tester
+    private DAOextends myDAO; // L'objet à tester
     private DataSource myDataSource; // La source de données à utiliser
 	
     
-    
-    
+   
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, DAOException {
+            throws ServletException, IOException{
         myDataSource = DataSourceFactory.getDataSource();
-	myDAO = new DAO(myDataSource);
+	myDAO = new DAOextends(myDataSource);
+        List<String> states= new ArrayList<>();
+        try {
+            states = myDAO.listOfState();
+        } catch (DAOException ex) {
+            Logger.getLogger(step2.class.getName()).log(Level.SEVERE, null, ex);
+        }
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
+            
+            
+            
+            
             /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet</title>");            
+            out.println("<title>Servlet step2</title>");  
+            out.println("<style>\n" +
+"table, th, td {\n" +
+"    border: 1px solid black;\n" +
+"}\n" +
+"</style>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<table style=\"width:100%\">\n  <tr><th>ID</th><th>NOM</th><th>ADDRESS</th></tr>");
-            List<CustomerEntity> customers = myDAO.customersInState(request.getParameter("STATE"));
-            for(CustomerEntity customer : customers){
-                out.println("<tr><td>"+ customer.getCustomerId() +"</td><td>"+ customer.getName()+"</td><td>"+ customer.getAddressLine1() +"</td></tr>");
-            }
             
+            out.println("<form>");
+            
+
+            out.println("<select id=\"etat\" name=\"etat\">");
+            for(String state : states){
+                out.println("<option value="+ state +">" + state + "</option>");
+            }
+            out.println("<input type=\"submit\" name=\"validation\" value=\"VALIDER\" />");
+            out.println("</select>");
+            out.println("</form>");
+            out.println("<table style=\"width:100%\">\n  <tr><th>ID</th><th>NOM</th><th>ADDRESS</th></tr>");
+            
+            String buttonClicked = request.getParameter("validation");
+            if(buttonClicked != null){
+                String s = request.getParameter("etat");
+                List<CustomerEntity> customers = myDAO.customersInState(s);
+                for(CustomerEntity customer : customers){
+                    out.println("<tr><td>"+ customer.getCustomerId() +"</td><td>"+ customer.getName()+"</td><td>"+ customer.getAddressLine1() +"</td></tr>");
+                }
+            }
             out.println("</body>");
             out.println("</html>");
+        } catch (DAOException ex) {
+            Logger.getLogger(step2.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -83,11 +111,7 @@ public class NewServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        try {
-            processRequest(request, response);
-        } catch (DAOException ex) {
-            Logger.getLogger(NewServlet.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        processRequest(request, response);
     }
 
     /**
@@ -101,11 +125,7 @@ public class NewServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        try {
-            processRequest(request, response);
-        } catch (DAOException ex) {
-            Logger.getLogger(NewServlet.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        processRequest(request, response);
     }
 
     /**
